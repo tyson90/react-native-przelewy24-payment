@@ -1,0 +1,33 @@
+{
+  "name": "react-native-przelewy24-payment",
+  "title": "React Native Przelewy24 Payment",
+  "version": "1.0.0",
+  "description": "Przelewy24 (PayPro S.A.) payments implementation for React Native",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tyson90/react-native-przelewy24-payment.git",
+    "baseUrl": "https://github.com/tyson90/react-native-przelewy24-payment"
+  },
+  "keywords": [
+    "react-native"
+  ],
+  "author": {
+    "name": "Konstantin Koulechov",
+    "email": "kostek@sni.pl"
+  },
+  "license": "MIT",
+  "licenseFilename": "LICENSE",
+  "readmeFilename": "README.md",
+  "peerDependencies": {
+    "react": "^16.8.1",
+    "react-native": ">=0.59.0-rc.0 <1.0.x"
+  },
+  "devDependencies": {
+    "react": "^16.8.3",
+    "react-native": "^0.59.10"
+  }
+}
