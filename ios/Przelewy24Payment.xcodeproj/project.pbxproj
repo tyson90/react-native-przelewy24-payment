@@ -8,6 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		B3E7B58A1CC2AC0600A0062D /* Przelewy24Payment.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* Przelewy24Payment.m */; };
+		B45AB34823E86C2600ACE6B2 /* libP24-bitcode.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B45AB34623E86C2600ACE6B2 /* libP24-bitcode.a */; };
+		B45AB34B23E86CCF00ACE6B2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B45AB34A23E86CCF00ACE6B2 /* Security.framework */; };
+		B45AB34D23E86CD600ACE6B2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B45AB34C23E86CD600ACE6B2 /* UIKit.framework */; };
+		B45AB34F23E86CE000ACE6B2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B45AB34E23E86CE000ACE6B2 /* Foundation.framework */; };
+		B45AB35123E86CEA00ACE6B2 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B45AB35023E86CEA00ACE6B2 /* libz.tbd */; };
+		B45AB35323E86CF200ACE6B2 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B45AB35223E86CF200ACE6B2 /* WebKit.framework */; };
+		B45AB35523E86CFC00ACE6B2 /* PassKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B45AB35423E86CFC00ACE6B2 /* PassKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,6 +33,14 @@
 		134814201AA4EA6300B7C361 /* libPrzelewy24Payment.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPrzelewy24Payment.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3E7B5881CC2AC0600A0062D /* Przelewy24Payment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Przelewy24Payment.h; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* Przelewy24Payment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Przelewy24Payment.m; sourceTree = "<group>"; };
+		B45AB34623E86C2600ACE6B2 /* libP24-bitcode.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libP24-bitcode.a"; sourceTree = "<group>"; };
+		B45AB34723E86C2600ACE6B2 /* P24.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = P24.h; sourceTree = "<group>"; };
+		B45AB34A23E86CCF00ACE6B2 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
+		B45AB34C23E86CD600ACE6B2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		B45AB34E23E86CE000ACE6B2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		B45AB35023E86CEA00ACE6B2 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
+		B45AB35223E86CF200ACE6B2 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/WebKit.framework; sourceTree = DEVELOPER_DIR; };
+		B45AB35423E86CFC00ACE6B2 /* PassKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PassKit.framework; path = System/Library/Frameworks/PassKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +48,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B45AB35523E86CFC00ACE6B2 /* PassKit.framework in Frameworks */,
+				B45AB35323E86CF200ACE6B2 /* WebKit.framework in Frameworks */,
+				B45AB35123E86CEA00ACE6B2 /* libz.tbd in Frameworks */,
+				B45AB34F23E86CE000ACE6B2 /* Foundation.framework in Frameworks */,
+				B45AB34D23E86CD600ACE6B2 /* UIKit.framework in Frameworks */,
+				B45AB34B23E86CCF00ACE6B2 /* Security.framework in Frameworks */,
+				B45AB34823E86C2600ACE6B2 /* libP24-bitcode.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -50,10 +72,26 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				B45AB34623E86C2600ACE6B2 /* libP24-bitcode.a */,
+				B45AB34723E86C2600ACE6B2 /* P24.h */,
 				B3E7B5881CC2AC0600A0062D /* Przelewy24Payment.h */,
 				B3E7B5891CC2AC0600A0062D /* Przelewy24Payment.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				B45AB34923E86CCF00ACE6B2 /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		B45AB34923E86CCF00ACE6B2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B45AB35423E86CFC00ACE6B2 /* PassKit.framework */,
+				B45AB35223E86CF200ACE6B2 /* WebKit.framework */,
+				B45AB35023E86CEA00ACE6B2 /* libz.tbd */,
+				B45AB34E23E86CE000ACE6B2 /* Foundation.framework */,
+				B45AB34C23E86CD600ACE6B2 /* UIKit.framework */,
+				B45AB34A23E86CCF00ACE6B2 /* Security.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -95,6 +133,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 58B511D21A9E6C8500147676;
@@ -216,13 +255,19 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
-				"$(inherited)",
+					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
 				);
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = "-ObjC";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-lstdc++",
+				);
 				PRODUCT_NAME = Przelewy24Payment;
 				SKIP_INSTALL = YES;
 			};
@@ -237,8 +282,14 @@
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
 				);
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = "-ObjC";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-lstdc++",
+				);
 				PRODUCT_NAME = Przelewy24Payment;
 				SKIP_INSTALL = YES;
 			};

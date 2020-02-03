@@ -3,7 +3,7 @@
 //  react-native-przelewy24-payment
 //
 //  Created by Marek Latuszek on 26/09/2019.
-//  Modified by Konstantin Koulechov on Feb 2019
+//  Modified by Konstantin Koulechov on Feb 2019.
 //  Copyright © 2019 Facebook. All rights reserved.
 //
 

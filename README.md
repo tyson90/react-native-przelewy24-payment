@@ -1,5 +1,7 @@
 # react-native-przelewy24-payment
 
+Based on [https://github.com/przelewy24/p24-mobile-lib-react-native-example](official example)
+
 ## Getting started
 
 `$ npm install react-native-przelewy24-payment --save`
