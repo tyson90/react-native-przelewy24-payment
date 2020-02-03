@@ -13,7 +13,14 @@
     "baseUrl": "https://github.com/tyson90/react-native-przelewy24-payment"
   },
   "keywords": [
-    "react-native"
+    "react-native",
+    "przelewy24",
+    "payments",
+    "p24",
+    "paypro",
+    "checkout",
+    "ios",
+    "android"
   ],
   "author": {
     "name": "Konstantin Koulechov",
