@@ -15,7 +15,7 @@
 P24ProtocolHandler* p24Handler;
 
 
-RCT_EXPORT_MODULE();
+RCT_EXPORT_MODULE(RNPrzelewy24Payment);
 
 RCT_EXPORT_METHOD(setCertificatePinningEnabled:(NSNumber * _Nonnull) isEnabled)
 {
@@ -45,6 +45,11 @@ RCT_EXPORT_METHOD(startTrnDirectWithParams:(NSDictionary*)params callback:(RCTRe
 
   if (p24Handler) {
     return;
+  }
+
+  NSLog(@"\n\nLoop through params provided by user APP\n---");
+  for (NSString *k in params[@"transactionParams"]) {
+    NSLog(@"%@ = %@", k, params[@"transactionParams"][k]);
   }
 
   p24Handler = [P24ProtocolHandler new];

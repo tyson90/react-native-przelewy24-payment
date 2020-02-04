@@ -1,5 +1,5 @@
-import { NativeModules } from 'react-native';
+import React from 'react';
 
-const { Przelewy24Payment } = NativeModules;
+import { P24Payment } from './P24';
 
-export default Przelewy24Payment;
+export default P24Payment;
