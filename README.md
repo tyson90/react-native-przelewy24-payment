@@ -47,7 +47,7 @@ Finally, install CocoaPods by running command:
 ### Extra steps for Android
 
 ```javascript
-// TODO:
+// TODO: Extra steps for Android if needed
 ```
 
 ## Usage
@@ -57,3 +57,43 @@ import Przelewy24Payment from 'react-native-przelewy24-payment';
 // TODO: What to do with the module?
 Przelewy24Payment;
 ```
+
+### Quick Example
+```javascript
+import React from 'react';
+import Example from 'react-native-przelewy24-payment/Example';
+
+export default class P24ExampleComponent extends React.Component
+{
+	render() {
+		const config = {
+			merchantId: '[YOUR P24 MERCHANT ID]',
+			crc: '[YOUR P24 CRC]',
+			sslPinningEnabled: false,
+			isSandbox: true,
+			sandboxCrc: '[YOUR P24 CRC FOR SANDBOX]', // required if you want to test in sandbox mode
+		}
+
+		return (
+			<Example
+				merchantId={config.merchantId}
+				crc={config.crc}
+				sslPinning={config.sslPinningEnabled}
+				isSandbox={config.isSandbox}
+				sandboxCrc={config.sandboxCrc}
+			/>
+		)
+	}
+}
+
+```
+
+# TODO
+
+* [ ] Android implementation
+* [ ] Android testting
+* [ ] iOS: Transfer trnRequest tests
+* [ ] iOS: Transfer express tests
+* [ ] iOS: Transfer passage tests
+* [ ] iOS: Change UIModalPresentationStyle to UIModalPresentationFullScreen
+* [ ] README

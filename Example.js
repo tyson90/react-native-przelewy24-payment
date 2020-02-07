@@ -19,6 +19,7 @@ import {
 	NativeModules,
 	Platform,
 	Dimensions,
+	Alert,
 } from 'react-native';
 
 import { P24Payment } from './P24';
@@ -168,9 +169,25 @@ export class TokenInput extends React.PureComponent {
 }
 
 export default class P24Example extends React.PureComponent {
-	state = {
-		is_sandbox: false,
-		url_or_token: '',
+	constructor(...args) {
+		super(...args);
+
+		this.state = {
+			is_sandbox: this.props.isSandbox,
+			url_or_token: '',
+		}
+
+		const checkProps = () => {
+			if (!this.props.merchantId || !this.props.crc || (this.props.isSandbox && !this.props.sandboxCrc)) {
+				Alert.alert('Warning', 'Missing required props: '+ ['merchantId', 'crc', this.props.isSandbox && 'sandboxCrc (when isSandbox={true})'].filter(e => e).join(', '));
+			}
+		}
+
+		if (process?.env?.NODE_ENV && process?.env?.NODE_ENV !== 'production') {
+			Alert.alert('Warning', 'The library contains anti-debug traps, so when using the library methods make sure the „Debug Executable” option is off.', checkProps);
+		} else {
+			checkProps();
+		}
 	}
 
 	constructP24() {
@@ -178,11 +195,11 @@ export default class P24Example extends React.PureComponent {
 			merchant_id: this.props.merchantId,
 			crc: this.props.crc,
 			sandbox_crc: this.props.sandboxCrc,
-			is_sandbox: this.props.isSandbox,
+			is_sandbox: this.state.is_sandbox,
 			ssl_pinning: this.props.sslPinning,
 		})
 
-		console.log({ p24 });
+		console.log({ p24 }, this.props);
 
 		return p24;
 	}

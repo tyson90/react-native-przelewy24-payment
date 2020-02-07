@@ -22,12 +22,16 @@ export class P24Payment {
 			console.log({ NativeModules });
 		}
 
-		if (process?.env?.NODE_ENV && process?.env?.NODE_ENV !== 'production') {
-			Alert.alert('Warning', 'The library contains anti-debug traps, so when using the library methods make sure the „Debug Executable” option is off.');
+		const checkProps = () => {
+			if (!merchant_id || !crc || (is_sandbox && !sandbox_crc)) {
+				console.warn('Warning', 'Missing required P24Payment.constructor parameters: '+ ['merchant_id', 'crc', is_sandbox && 'sandbox_crc (when is_sandbox=true)'].filter(e => e).join(', '));
+			}
 		}
 
-		if (!merchant_id || !crc || (is_sandbox && !sandbox_crc)) {
-			Alert.alert('Warning', 'Missing required P24Payment.constructor parameters.');
+		if (process?.env?.NODE_ENV && process?.env?.NODE_ENV !== 'production') {
+			console.warn('Warning', 'The library contains anti-debug traps, so when using the library methods make sure the „Debug Executable” option is off.', checkProps);
+		} else {
+			checkProps();
 		}
 	}
 

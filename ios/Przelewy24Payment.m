@@ -24,7 +24,6 @@ RCT_EXPORT_METHOD(setCertificatePinningEnabled:(NSNumber * _Nonnull) isEnabled)
 
 RCT_EXPORT_METHOD(startTrnRequestWithParams:(NSDictionary*)params callback:(RCTResponseSenderBlock)callback)
 {
-
     if (p24Handler) {
         return;
     }
@@ -37,38 +36,53 @@ RCT_EXPORT_METHOD(startTrnRequestWithParams:(NSDictionary*)params callback:(RCTR
     dispatch_sync(dispatch_get_main_queue(), ^{
         [P24 startTrnRequest:trnParams inViewController:[Przelewy24Payment rootViewController] delegate:p24Handler];
     });
-
 }
 
 RCT_EXPORT_METHOD(startTrnDirectWithParams:(NSDictionary*)params callback:(RCTResponseSenderBlock)callback)
 {
+    if (p24Handler) {
+        return;
+    }
 
-  if (p24Handler) {
-    return;
-  }
+    NSLog(@"\n\nLoop through params provided by user APP\n---");
+    for (NSString *k in params[@"transactionParams"]) {
+        NSLog(@"%@ = %@", k, params[@"transactionParams"][k]);
+    }
 
-  NSLog(@"\n\nLoop through params provided by user APP\n---");
-  for (NSString *k in params[@"transactionParams"]) {
-    NSLog(@"%@ = %@", k, params[@"transactionParams"][k]);
-  }
+    p24Handler = [P24ProtocolHandler new];
+    p24Handler.rctCallback = callback;
 
-  p24Handler = [P24ProtocolHandler new];
-  p24Handler.rctCallback = callback;
+    P24TransactionParams* transaction = [Przelewy24Payment transactionParams:params[@"transactionParams"]];
 
-  P24TransactionParams* transaction = [Przelewy24Payment transactionParams:params[@"transactionParams"]];
+    P24TrnDirectParams* trnParams = [[P24TrnDirectParams alloc] initWithTransactionParams:transaction];
+    trnParams.sandbox = [params[@"isSandbox"] boolValue];
 
-  P24TrnDirectParams* trnParams = [[P24TrnDirectParams alloc] initWithTransactionParams:transaction];
-  trnParams.sandbox = [params[@"isSandbox"] boolValue];
+    // UIViewController *vc = [Przelewy24Payment rootViewController];
 
-  dispatch_sync(dispatch_get_main_queue(), ^{
-    [P24 startTrnDirect:trnParams inViewController:[Przelewy24Payment rootViewController] delegate:p24Handler];
-  });
+    // UINavigationController *vc = [UINavigationController alloc];
+    // vc.modalPresentationStyle = UIModalPresentationFullScreen;
+    UIViewController *visibleVC = [[[UIApplication sharedApplication] keyWindow] rootViewController];
+    do {
+        if ([visibleVC isKindOfClass:[UINavigationController class]]) {
+            visibleVC = [(UINavigationController *)visibleVC visibleViewController];
+        } else if (visibleVC.presentedViewController) {
+            visibleVC = visibleVC.presentedViewController;
+        }
+    } while (visibleVC.presentedViewController);
 
+    visibleVC.modalPresentationStyle = UIModalPresentationFullScreen;
+
+    // if (@available(iOS 13.0, *)) {
+    //     vc.modalInPresentation = NO;
+    // }
+
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        [P24 startTrnDirect:trnParams inViewController:visibleVC delegate:p24Handler];
+    });
 }
 
 RCT_EXPORT_METHOD(startExpressWithParams:(NSDictionary*)params callback:(RCTResponseSenderBlock)callback)
 {
-
     if (p24Handler) {
         return;
     }
@@ -81,7 +95,6 @@ RCT_EXPORT_METHOD(startExpressWithParams:(NSDictionary*)params callback:(RCTResp
     dispatch_sync(dispatch_get_main_queue(), ^{
         [P24 startExpress:express inViewController:[Przelewy24Payment rootViewController] delegate:p24Handler];
     });
-
 }
 
 + (P24TransactionParams*) transactionParams: (NSDictionary*) params {
@@ -139,7 +152,6 @@ RCT_EXPORT_METHOD(startExpressWithParams:(NSDictionary*)params callback:(RCTResp
 
     transaction.amount = [[params valueForKey:@"amount"] intValue];
     transaction.passageCart = passageCart;
-
 }
 
 + (void) paymentClosed {
@@ -148,6 +160,9 @@ RCT_EXPORT_METHOD(startExpressWithParams:(NSDictionary*)params callback:(RCTResp
 
 + (UIViewController*) rootViewController {
     return [[[[UIApplication sharedApplication] delegate] window]rootViewController];
+    // vc.modalPresentationStyle = UIModalPresentationFullScreen;
+
+    // return vc;
 }
 
 @end
