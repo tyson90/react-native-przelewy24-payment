@@ -51,14 +51,116 @@ Finally, install CocoaPods by running command:
 ```
 
 ## Usage
+
 ```javascript
 import Przelewy24Payment from 'react-native-przelewy24-payment';
 
-// TODO: What to do with the module?
-Przelewy24Payment;
+// Pre-defined constants you may need
+const P24_CHANNEL_CARDS = 1;
+const P24_CHANNEL_TRANSFERS = 2;
+const P24_CHANNEL_TRADITIONAL_TRANSFERS = 4;
+const P24_CHANNEL_NA = 8;
+const P24_CHANNEL_24_7 = 16;
+const P24_CHANNEL_PREPAYMENT = 32;
+
+// Define configuration
+const config = {
+	merchant_id: '[YOUR P24 MERCHANT ID]',
+	crc: '[YOUR P24 CRC]',
+	ssl_pinning: false,
+	is_sandbox: true,
+	sandbox_crc: '[YOUR P24 CRC FOR SANDBOX]', // required if you want to test in sandbox mode
+}
+
+// Get instance
+const p24 = new Przelewy24Payment(config);
+
+// Define your callbacks for successfull and cancelled transactions and if error occurs
+const p24_callbacks = {
+	success: (msg) => console.info(msg),
+	cancel: (msg) => console.info(msg),
+	error: (error) => console.warn(error),
+}
 ```
 
-### Quick Example
+### 1. Make direct transaction call (trnDirect)
+
+```javascript
+// Define request parameters (in real world you will get it ex. from user order)
+const trn_params = {
+	// required parameters
+	sessionId: '[SOME UNIQUE SESSION ID AS STRING]',
+	amount: 2500, // amount 2500 = $25.00
+	currency: 'USD',
+	description: 'Order number XYZ',
+	email: 'test@test.com',
+	country: 'US',
+	// some optional client data
+	client: 'John Smith',
+	address: 'Street with house/flat number',
+	zip: '00-000',
+	city: 'New York',
+	phone: '+1 000 111 2222',
+	language: 'en',
+	// some optional other parameters
+	urlStatus: 'https://yourdomain.com/p24_status_return.php',
+	timeLimit: 15, // time in minutes
+}
+
+// If you need disable all methods except cards
+let cardsOnly = true;
+
+if (cardsOnly) {
+	trn_data.channel = P24_CHANNEL_CARDS;
+	// Or you can set it to another one
+}
+
+// Make transaction call
+p24.startTrnDirect(trn_params, p24_callbacks);
+```
+
+You can read full documentation for request parameters [here](https://www.przelewy24.pl/storage/app/media/pobierz/Instalacja/przelewy24_dokumentacja_3.2.pdf).
+
+### 2. trnRequest transaction call
+
+```javascript
+// TODO: test and write better documentation
+p24.startTrnRequest(token, p24_callbacks);
+```
+
+### 3. Express transaction call
+
+```javascript
+// TODO: test and write better documentation
+p24.startTrnExpress(url, p24_callbacks);
+```
+
+### 4. Passage 2.0 transaction call
+
+```javascript
+// TODO: test and write better documentation
+
+// trn_params are the same as in startTrnDirect
+
+// Items: array of objects
+const items = [];
+
+items.push({
+	name: 'Item #1',
+	description: 'Description #1',
+	number: 1,
+	quantity: 3,
+	price: 1000,
+	targetAmount: 3000, // item.price * item.quantity
+	targetPosId: '[TARGET POS ID]',
+});
+
+// items.push(/* second item */);
+
+p24.startTrnPassage(trn_params, items, p24_callbacks);
+```
+
+### Quick Example Screen
 ```javascript
 import React from 'react';
 import Example from 'react-native-przelewy24-payment/Example';
@@ -85,7 +187,6 @@ export default class P24ExampleComponent extends React.Component
 		)
 	}
 }
-
 ```
 
 # TODO
@@ -96,4 +197,4 @@ export default class P24ExampleComponent extends React.Component
 * [ ] iOS: Transfer express tests
 * [ ] iOS: Transfer passage tests
 * [ ] iOS: Change UIModalPresentationStyle to UIModalPresentationFullScreen
-* [ ] README
+* [ ] Update README
