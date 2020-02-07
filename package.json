@@ -1,7 +1,7 @@
 {
   "name": "react-native-przelewy24-payment",
   "title": "React Native Przelewy24 Payment",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Przelewy24 (PayPro S.A.) payments implementation for React Native",
   "main": "index.js",
   "scripts": {
@@ -24,7 +24,7 @@
   ],
   "author": {
     "name": "Konstantin Koulechov",
-    "email": "kostek@sni.pl"
+    "email": "kostek.sni@gmail.pl"
   },
   "license": "MIT",
   "licenseFilename": "LICENSE",
