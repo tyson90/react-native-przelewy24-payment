@@ -176,10 +176,10 @@ export class P24Payment {
 	buildTransactionParams(params = {}) {
 		// TODO: Validate params
 
-		return {
+		const trnParams = {
 			merchantId: this.config.merchant_id,
 			crc: this.getCrc(),
-			sessionId: params.session_id,
+			sessionId: params.sessionId || params.session_id,
 			amount: params.amount,
 			currency: params.currency || params.currency_id,
 			description: params.description,
@@ -192,6 +192,35 @@ export class P24Payment {
 			phone: params.phone,
 			language: params.language || params.lang,
 		}
+
+		// Optional parameters
+
+		if (params.method) {
+			trnParams.method = params.method;
+		}
+
+		if (params.timeLimit) {
+			trnParams.timeLimit = params.timeLimit;
+		}
+
+		if (params.channel) {
+			trnParams.channel = params.channel;
+		}
+
+		if (params.urlStatus) {
+			trnParams.urlStatus = params.urlStatus;
+		}
+
+		if (params.transferLabel) {
+			trnParams.transferLabel = params.transferLabel;
+		}
+
+		if (params.shipping) {
+			trnParams.shipping = params.shipping;
+		}
+
+
+		return trnParams;
 	}
 
 	buildPassageParams(params, items = []) {
