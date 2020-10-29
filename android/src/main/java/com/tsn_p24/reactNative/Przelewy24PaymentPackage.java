@@ -1,4 +1,4 @@
-package com.tsn-p24.react-native;
+package com.tsn_p24.reactNative;
 
 import java.util.Arrays;
 import java.util.Collections;

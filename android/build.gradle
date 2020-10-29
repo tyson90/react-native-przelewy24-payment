@@ -82,7 +82,7 @@ def configureReactNativePom(def pom) {
         name packageJson.title
         artifactId packageJson.name
         version = packageJson.version
-        group = "com.tsn-p24.react-native"
+        group = "com.tsn_p24.reactNative"
         description packageJson.description
         url packageJson.repository.baseUrl
 
