@@ -3,7 +3,7 @@ import { NativeModules, Platform, Alert } from 'react-native';
 
 const { RNPrzelewy24Payment: Przelewy24Payment } = NativeModules;
 
-export class P24Payment {
+class P24Payment {
 	constructor({ merchant_id, crc, sandbox_crc, ssl_pinning, is_sandbox } = {}) {
 		this.config = {
 			merchant_id: `${merchant_id}`,
@@ -38,14 +38,16 @@ export class P24Payment {
 	configure(platform) {
 		this.functions = {};
 
-		this.functions.doRequestComplete = (success, cancel, error, callbacks) => {
+		this.functions.doRequestComplete = async (success, cancel, error, callbacks) => {
 			const info = { success, cancel, error };
 
 			if (success) {
 				console.log('Transfer success');
+				await require('utils/Helper').fakeAwait(2500);
 				this.finishWithStatus('success', info, callbacks);
 			} else if (cancel) {
 				console.log('Transfer canceled');
+				await require('utils/Helper').fakeAwait(2500);
 				this.finishWithStatus('cancel', info, callbacks);
 			} else {
 				console.log(`Transfer error. Code: ${error}`);
@@ -161,12 +163,41 @@ export class P24Payment {
 					})
 				}
 
+				this.functions.doApplePay = async (params, callbacks, onToken = this.noFun) => {
+					const applepay_is_avail = await Przelewy24Payment.canMakeApplePayPayments();
+
+					if (!applepay_is_avail) {
+						console.error(`Apple Pay is not available for this device. You should check it by calling Przelewy24Payment.canMakeApplePayPayments() before oferring Apple Pay`);
+						return false;
+					}
+
+					var applePayParams = {
+						appleMerchantId: params.appleMerchantId,
+						amount: +params.amount,
+						currency: params.currency,
+						description: params.description,
+						isSandbox: this.config.is_sandbox,
+						items: params.items,
+
+						// Optional parameters
+						fullScreen: Boolean(params.fullScreen),
+					}
+
+					Przelewy24Payment.startApplePay(applePayParams, (success, cancel, error) => {
+						this.functions.doRequestComplete(success, cancel, error, callbacks);
+					}, onToken)
+				}
+
 				break;
 
 			default:
 				console.error(`Platform '${platform}' is not supported. Supported platforms are: 'ios', 'android'`);
 				break;
 		}
+	}
+
+	noFun = (...args) => {
+		console.log('Called P24.noFun with args', { args });
 	}
 
 	getCrc() {
@@ -236,6 +267,7 @@ export class P24Payment {
 		const callback = callbacks[status];
 
 		if (typeof callback == 'function') {
+			console.log({ status, info , cur_tm: new Date().getTime()/1000 });
 			callback(info[status]);
 		}
 	}
@@ -257,4 +289,21 @@ export class P24Payment {
 	startTrnPassage(params, items, callbacks) {
 		this.functions.doPassage(params, items, callbacks);
 	}
+
+	startApplePay(params, callbacks, onToken) {
+		this.functions.doApplePay(params, callbacks, onToken);
+	}
+
+	static async canMakeApplePayPayments() {
+		return await Przelewy24Payment.canMakeApplePayPayments();
+	}
+
+	static clear() {
+		return Przelewy24Payment.clear();
+	}
+}
+
+export {
+	Przelewy24Payment,
+	P24Payment,
 }

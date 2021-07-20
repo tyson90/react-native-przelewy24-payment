@@ -160,6 +160,12 @@ items.push({
 p24.startTrnPassage(trn_params, items, p24_callbacks);
 ```
 
+### 6. Apple Pay
+
+```javascript
+// TODO: Paste from P24 doc and own JS code
+```
+
 ### Quick Example Screen
 ```javascript
 import React from 'react';

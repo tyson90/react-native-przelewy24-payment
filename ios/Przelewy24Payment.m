@@ -3,16 +3,18 @@
 //  react-native-przelewy24-payment
 //
 //  Created by Marek Latuszek on 26/09/2019.
-//  Modified by Konstantin Koulechov on Feb 2019.
-//  Copyright © 2019 Facebook. All rights reserved.
+//  Modified by Konstantin Koulechov on Feb 2019 and later.
 //
 
 #import "Przelewy24Payment.h"
 #import <React/RCTLog.h>
+#import <PassKit/PassKit.h>
 
 @implementation Przelewy24Payment
 
 P24ProtocolHandler* p24Handler;
+P24ApplePayProtocolHandler* p24ApplePayHandler;
+P24ApplePayRegistrarProtocolHandler* p24ApplePayRegisterHandler;
 
 
 RCT_EXPORT_MODULE(RNPrzelewy24Payment);
@@ -97,6 +99,119 @@ RCT_EXPORT_METHOD(startExpressWithParams:(NSDictionary*)params callback:(RCTResp
     });
 }
 
+- (BOOL) canMakeApplePayPayments {
+    if (@available(iOS 10.0, *)) {
+      return [PKPaymentAuthorizationController canMakePayments];
+    } else {
+      return NO;
+    }
+}
+
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(canMakeApplePayPaymentsSync)
+{
+    return @([self canMakeApplePayPayments]);
+}
+
+RCT_EXPORT_METHOD(canMakeApplePayPayments:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    resolve(@([self canMakeApplePayPayments]));
+}
+
+RCT_EXPORT_METHOD(finishApplePay:(NSString*)p24token)
+{
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        NSLog(@"Timestamp before RCT finishApplePay: %f", [[NSDate date] timeIntervalSince1970]);
+        [Przelewy24Payment finishApplePay:p24token];
+        NSLog(@"Timestamp after RCT finishApplePay: %f", [[NSDate date] timeIntervalSince1970]);
+    });
+}
+
+RCT_EXPORT_METHOD(startApplePay:(NSDictionary*)params callback:(RCTResponseSenderBlock)callback callback2:(RCTResponseSenderBlock)callback2)
+{
+    if (p24ApplePayHandler) {
+        return;
+    }
+
+    NSLog(@"\n\nApple Pay: Loop through params provided by user APP\n---");
+    for (NSString *k in params) {
+        NSLog(@"%@ = %@", k, params[k]);
+    }
+
+    // if ([PKPaymentAuthorizationViewController canMakePayments]) {
+    //     NSLog(@"Can Make Payments");
+    // } else {
+    //     NSLog(@"Can't Make payments");
+    // }
+
+    p24ApplePayHandler = [P24ApplePayProtocolHandler new];
+    p24ApplePayHandler.rctCallback = callback;
+
+    p24ApplePayRegisterHandler = [P24ApplePayRegistrarProtocolHandler new];
+    p24ApplePayRegisterHandler.rctCallback = callback2;
+    // p24ApplePayOnTokenCallback = callback2;
+
+// ORIGINAL SWIFT CODE EXAMPLE START
+    // let params = P24ApplePayParams.init(
+    //   appleMerchantId: "merchant.Przelewy24.sandbox",
+    //   amount: 1,
+    //   currency: "PLN",
+    //   description: "Test transaction",
+    //   registrar: self
+    // )
+    //
+    // P24.startApplePay(params, in: self, delegate: self)
+// ORIGINAL SWIFT CODE EXAMPLE END
+
+    P24ApplePayParams* apParams = [[P24ApplePayParams alloc] init];
+    // P24ApplePayTransactionRegistrar* apRegistrar = [[P24ApplePayTransactionRegistrar alloc] init];
+
+    // required
+    apParams.appleMerchantId = params[@"appleMerchantId"];
+    apParams.currency = params[@"currency"];
+    // apParams.amount = [params[@"amount"] intValue];
+    apParams.description = params[@"description"];
+    apParams.registrar = self;
+
+    // items are required. If no provided, create from amount and description
+    if ([params valueForKey:@"items"] != nil) {
+        NSArray *items = [params valueForKeyPath:@"items"];
+        NSMutableArray* apItems = [[NSMutableArray alloc] init];
+
+        for (int i = 0; i < [items count]; i++) {
+            NSDictionary *element = [items objectAtIndex:i];
+            PaymentItem* item = [[PaymentItem alloc] init];
+            item.amount = [element[@"amount"] intValue];
+            item.itemDescription = element[@"itemDescription"];
+
+            [apItems addObject:item];
+        }
+
+        apParams.items = apItems;
+    } else {
+        PaymentItem* item1 = [[PaymentItem alloc] init];
+        item1.amount = [params[@"amount"] intValue];
+        item1.itemDescription = params[@"description"];
+        NSArray *items = @[item1];
+
+        apParams.items = items;
+    }
+
+    NSLog(@"ApplePay params.items:\n\t%@", apParams.items);
+
+    // optional
+    apParams.sandbox = [params[@"isSandbox"] boolValue];
+    apParams.fullScreen = [params[@"fullScreen"] boolValue];
+
+    // UIViewController *vc = [PKPaymentAuthorizationController init];
+    UIViewController *vc = [Przelewy24Payment rootViewController];
+
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        NSLog(@"Timestamp before startApplePay: %f", [[NSDate date] timeIntervalSince1970]);
+        [P24 startApplePay:apParams inViewController:vc delegate:p24ApplePayHandler];
+        NSLog(@"Timestamp after startApplePay: %f", [[NSDate date] timeIntervalSince1970]);
+    });
+}
+
 + (P24TransactionParams*) transactionParams: (NSDictionary*) params {
     P24TransactionParams* transaction = [P24TransactionParams new];
 
@@ -156,6 +271,35 @@ RCT_EXPORT_METHOD(startExpressWithParams:(NSDictionary*)params callback:(RCTResp
 
 + (void) paymentClosed {
     p24Handler = nil;
+    NSLog(@"\n\nP24 PAYMENT CLOSED\n\n");
+}
+
++ (void) applePayPaymentClosed {
+    p24ApplePayHandler = nil;
+    p24ApplePayRegisterHandler = nil;
+    NSLog(@"\n\nP24 APPLEPAY PAYMENT CLOSED\n\n");
+    NSLog(@"Timestamp after closed: %f", [[NSDate date] timeIntervalSince1970]);
+}
+
+RCT_EXPORT_METHOD(clear)
+{
+    [Przelewy24Payment paymentClosed];
+    [Przelewy24Payment applePayPaymentClosed];
+}
+
+- (void) exchange: (NSString*) applePayToken delegate: (id<P24ApplePayTransactionRegistrarDelegate>) delegate {
+    NSLog(@"Timestamp before exchange: %f", [[NSDate date] timeIntervalSince1970]);
+    NSLog(@"ApplePay exchange applePayToken = %@", applePayToken);
+    [p24ApplePayRegisterHandler onRegisterSuccess:applePayToken delegate:delegate];
+    // [delegate onRegisterSuccess:@"D485AEB65C-C0F20B-9BC29D-BA835F21C4"];
+    // p24ApplePayOnTokenCallback(@[applePayToken]);
+    NSLog(@"Timestamp after exchange: %f", [[NSDate date] timeIntervalSince1970]);
+}
+
++ (void) finishApplePay: (NSString*) p24token {
+    NSLog(@"Timestamp before finishApplePay: %f", [[NSDate date] timeIntervalSince1970]);
+    [p24ApplePayRegisterHandler onRegisterSuccess:p24token];
+    NSLog(@"Timestamp after finishApplePay: %f", [[NSDate date] timeIntervalSince1970]);
 }
 
 + (UIViewController*) rootViewController {

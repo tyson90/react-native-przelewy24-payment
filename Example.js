@@ -22,7 +22,7 @@ import {
 	Alert,
 } from 'react-native';
 
-import { P24Payment } from './P24';
+import { P24Payment, Przelewy24Payment } from './P24';
 
 function getTestTransactionParams(amount = 3) {
 	return {
@@ -45,9 +45,9 @@ function getTestPassageItems(itemsCount = 10) {
 	let amount = 0;
 	let items = [];
 
-	for (var i = 0; i < itemsCount; i++) {
-		var price = 2 * (100 + i);
-		var item = {
+	for (let i = 0; i < itemsCount; i++) {
+		const price = 2 * (100 + i);
+		const item = {
 			name: 'Product name ' + i,
 			description: 'Product description ' + i,
 			number: i,
@@ -62,6 +62,31 @@ function getTestPassageItems(itemsCount = 10) {
 	}
 
 	return { amount, items };
+}
+
+function getTestApplePayParams(appleMerchantId, amount = 3) {
+	if (typeof appleMerchantId === 'number') {
+		amount = appleMerchantId;
+		appleMerchantId = void 0;
+	}
+
+	return {
+		appleMerchantId: appleMerchantId || 'merchant.Przelewy24.sandbox',
+		amount: amount,
+		currency: 'PLN',
+		description: 'Test payment with Apple Pay',
+	}
+}
+
+function getTestApplePayParamsWithItems(appleMerchantId, amount) {
+	const params = getTestApplePayParams(appleMerchantId, amount);
+
+	params.items = [
+		{ amount: params.amount + 1, itemDescription: 'Item 1st' },
+		{ amount: params.amount + 3, itemDescription: 'Item 2nd' },
+	];
+
+	return params;
 }
 
 function generateSessionId() {
@@ -80,7 +105,7 @@ export class SandboxSwitch extends React.PureComponent {
 				</Text>
 
 				<Switch
-					title='Sandbox'
+					title={'Sandbox'}
 					value={this.props.value}
 					onValueChange={this.props.onChange}
 				/>
@@ -98,7 +123,7 @@ export class TrnRequestButton extends React.PureComponent {
 		return (
 			<View style={styles.buttonContainer}>
 				<Button
-					title='Transfer trnRequest'
+					title={'Transfer trnRequest'}
 					styleDisabled={{ color: 'red' }}
 					onPress={this.props.onPress}>
 				</Button>
@@ -112,7 +137,7 @@ export class TrnDirectButton extends React.PureComponent {
 		return (
 			<View style={styles.buttonContainer}>
 				<Button
-					title='Transfer trnDirect'
+					title={'Transfer trnDirect'}
 					styleDisabled={{ color: 'red' }}
 					onPress={this.props.onPress}>
 				</Button>
@@ -126,7 +151,7 @@ export class ExpressButton extends React.PureComponent {
 		return (
 			<View style={styles.buttonContainer}>
 				<Button
-					title='Transfer express'
+					title={'Transfer express'}
 					styleDisabled={{ color: 'red' }}
 					onPress={this.props.onPress}>
 				</Button>
@@ -140,7 +165,21 @@ export class PassageButton extends React.PureComponent {
 		return (
 			<View style={styles.buttonContainer}>
 				<Button
-					title='Transfer passage'
+					title={'Transfer passage'}
+					styleDisabled={{ color: 'red' }}
+					onPress={this.props.onPress}>
+				</Button>
+			</View>
+		)
+	}
+}
+
+export class ApplePayButton extends React.PureComponent {
+	render() {
+		return (
+			<View style={styles.buttonContainer}>
+				<Button
+					title={this.props.title || 'Apple Pay'}
 					styleDisabled={{ color: 'red' }}
 					onPress={this.props.onPress}>
 				</Button>
@@ -212,23 +251,65 @@ export default class P24Example extends React.PureComponent {
 		}
 	}
 
-	startTrnRequest() {
+	startTrnRequest = () => {
 		this.constructP24().startTrnRequest(this.state.url_or_token, this.getCallbacks());
 	}
 
-	startTrnDirect() {
+	startTrnDirect = () => {
 		this.constructP24().startTrnDirect(getTestTransactionParams(), this.getCallbacks());
 	}
 
-	startTrnExpress() {
+	startTrnExpress = () => {
 		this.constructP24().startTrnExpress(this.state.url_or_token, this.getCallbacks());
 	}
 
-	startTrnPassage() {
+	startTrnPassage = () => {
 		const { amount, items } = getTestPassageItems(4);
 		const params = getTestTransactionParams(amount);
 
 		this.constructP24().startTrnPassage(params, items, this.getCallbacks());
+	}
+
+	startApplePay = async () => {
+		const p24 = this.constructP24();
+		const { appleMerchantId } = this.props;
+
+		try {
+			P24Payment.canMakeApplePayPayments().then((can) => console.log({ can })).catch(e => console.warn(e));
+			console.log('Can make payments?', await P24Payment.canMakeApplePayPayments());
+		} catch (e) {
+			console.error(e);
+		}
+
+		if (!appleMerchantId) {
+			return Alert.alert('Error', 'You should provide `appleMerchantId` prop for testing Apple Pay');
+		}
+
+		p24.startApplePay(getTestApplePayParams(appleMerchantId), this.getCallbacks(), this.onApplePayToken);
+	}
+
+	startApplePayWithItems = () => {
+		const { appleMerchantId } = this.props;
+
+		if (!appleMerchantId) {
+			return Alert.alert('Error', 'You should provide `appleMerchantId` prop for testing Apple Pay');
+		}
+
+		this.constructP24().startApplePay(getTestApplePayParamsWithItems(appleMerchantId), this.getCallbacks());
+	}
+
+	onApplePayToken = async (token, ...args) => {
+		const { onApplePayToken } = this.props;
+		console.log(typeof onApplePayToken, { token, args });
+
+		if (typeof onApplePayToken !== 'function') {
+			Alert.alert('Error', 'You should provide `onApplePayToken` prop (async func, which should return valid P24_TRANSACTION_TOKEN) for finish Apple Pay');
+			P24Payment.clear();
+			return;
+		}
+
+		const p24_token = await onApplePayToken(token);
+		await Przelewy24Payment.finishApplePay(p24_token);
 	}
 
 	render() {
@@ -253,10 +334,15 @@ export default class P24Example extends React.PureComponent {
 					onChange={(is_sandbox) => this.setState({ is_sandbox })}
 				/>
 
-				<TrnRequestButton onPress={() => this.startTrnRequest()} />
-				<TrnDirectButton onPress={() => this.startTrnDirect()} />
-				<ExpressButton onPress={() => this.startTrnExpress()} />
-				<PassageButton onPress={() => this.startTrnPassage()} />
+				<TrnRequestButton onPress={this.startTrnRequest} />
+				<TrnDirectButton onPress={this.startTrnDirect} />
+				<ExpressButton onPress={this.startTrnExpress} />
+				<PassageButton onPress={this.startTrnPassage} />
+				<ApplePayButton onPress={this.startApplePay} />
+				<ApplePayButton
+					onPress={this.startApplePayWithItems}
+					title={'Apple Pay with items'}
+				/>
 
 				<TokenInput
 					value={this.state.url_or_token}

@@ -3,8 +3,7 @@
 //  react-native-przelewy24-payment
 //
 //  Created by Arkadiusz Macudziński on 29.08.2016.
-//  Modified by Konstantin Koulechov on Feb 2019.
-//  Copyright © 2016 Facebook. All rights reserved.
+//  Modified by Konstantin Koulechov on Feb 2019 and later.
 //
 
 #import <React/RCTBridgeModule.h>
@@ -14,7 +13,5 @@
 @interface P24ProtocolHandler : NSObject<P24TransferDelegate>
 
 @property (strong) RCTResponseSenderBlock rctCallback;
-
-
 
 @end

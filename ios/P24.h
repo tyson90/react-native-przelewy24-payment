@@ -69,22 +69,17 @@
 
 @end
 
-@interface P24 : NSObject
-
-+ (NSString *) sdkVersion;
-+ (void)startRegisterCard:(P24RegisterCardParams *)params inViewController:(UIViewController *)viewController delegate:(id<P24RegisterCardDelegate>) delegate;
-+ (void) startRpc:(P24RpcParams *) params inViewController:(UIViewController *) viewController delegate:(id<P24RpcDelegate>) delegate;
-
-@end
-
 @interface P24SdkConfig : NSObject
 
 + (BOOL) isCertificatePinningEnabled;
++ (BOOL) isExitOnBackButtonEnabled;
++ (BOOL) isSplitPaymentEnabled;
+
 + (void) setCertificatePinningEnabled: (BOOL) isEnabled;
++ (void) setExitOnBackButtonEnabled: (BOOL) isEnabled;
++ (void) setSplitPaymentEnabled: (BOOL) isEnabled;
 
 @end
-
-
 
 @interface P24PassageItem : NSObject
 
@@ -105,7 +100,7 @@
 @property (nonatomic, strong, readonly) NSArray* items;
 
 - (void) addItem: (P24PassageItem*) item;
-
+- (int) getSummaryPrice;
 @end
 
 @interface P24TransactionParams : NSObject
@@ -180,18 +175,34 @@
 
 @end
 
+@interface PaymentItem : NSObject
+
+@property (nonatomic, copy) NSString *itemDescription;
+@property (nonatomic, assign) int amount;
+
+@end
+
 @interface P24ApplePayParams: NSObject
 
 @property (nonatomic, copy) NSString *appleMerchantId;
 @property (nonatomic, assign) int amount;
 @property (nonatomic, copy) NSString *currency;
+@property (nonatomic, copy) NSString *description;
+@property (nonatomic, copy) NSArray<PaymentItem *> *items;
 @property (weak) id<P24ApplePayTransactionRegistrar> registrar;
 @property (nonatomic, assign, readwrite) BOOL sandbox;
+@property (nonatomic, assign, readwrite) BOOL fullScreen;
 
 - (instancetype)initWithAppleMerchantId:(NSString *)appleMerchantId
-                                 amount: (int)amount
+                                 amount:(int)amount
                                currency:(NSString *)currency
-                              registrar: (id<P24ApplePayTransactionRegistrar>) registrar;
+                            description:(NSString *)description
+                              registrar:(id<P24ApplePayTransactionRegistrar>) registrar;
+
+- (instancetype)initWithItems: (NSArray<PaymentItem *> *) items
+                     currency: (NSString *) currency
+              appleMerchantId: (NSString *) appleMerchantId
+                    registrar: (id<P24ApplePayTransactionRegistrar>) registrar;
 
 @end
 
@@ -215,14 +226,23 @@
 
 @end
 
-@interface P24 (Secure)
 
+
+
+@interface P24 : NSObject
+
++ (NSString *) sdkVersion;
++ (void) startRegisterCard:(P24RegisterCardParams *)params inViewController:(UIViewController *)viewController delegate:(id<P24RegisterCardDelegate>) delegate;
++ (void) startRpc:(P24RpcParams *) params inViewController:(UIViewController *) viewController delegate:(id<P24RpcDelegate>) delegate;
 + (void)startTrnRequest:(P24TrnRequestParams *)params inViewController:(UIViewController *)parent delegate:(id<P24TransferDelegate>) delegate;
-
 + (void)startTrnDirect:(P24TrnDirectParams *)params inViewController:(UIViewController *)parent delegate:(id<P24TransferDelegate>) delegate;
-
 + (void)startExpress:(P24ExpressParams *)params inViewController:(UIViewController *)parent delegate:(id<P24TransferDelegate>) delegate;
-
 + (void)startApplePay:(P24ApplePayParams *)params inViewController:(UIViewController *)parent delegate:(id<P24ApplePayDelegate>) delegate;
+
+@end
+
+
+
+@interface P24 (Secure)
 
 @end

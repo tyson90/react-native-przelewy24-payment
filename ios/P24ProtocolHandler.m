@@ -3,8 +3,7 @@
 //  react-native-przelewy24-payment
 //
 //  Created by Arkadiusz Macudziński on 29.08.2016.
-//  Modified by Konstantin Koulechov on Feb 2019.
-//  Copyright © 2016 Facebook. All rights reserved.
+//  Modified by Konstantin Koulechov on Feb 2019 and later.
 //
 
 #import "P24ProtocolHandler.h"
@@ -25,6 +24,5 @@
   _rctCallback(@[[NSNull null], [NSNull null], errorCode ]);
   [Przelewy24Payment paymentClosed];
 }
-
 
 @end
