@@ -59,27 +59,20 @@ RCT_EXPORT_METHOD(startTrnDirectWithParams:(NSDictionary*)params callback:(RCTRe
     P24TrnDirectParams* trnParams = [[P24TrnDirectParams alloc] initWithTransactionParams:transaction];
     trnParams.sandbox = [params[@"isSandbox"] boolValue];
 
-    // UIViewController *vc = [Przelewy24Payment rootViewController];
-
     // UINavigationController *vc = [UINavigationController alloc];
     // vc.modalPresentationStyle = UIModalPresentationFullScreen;
-    UIViewController *visibleVC = [[[UIApplication sharedApplication] keyWindow] rootViewController];
-    do {
-        if ([visibleVC isKindOfClass:[UINavigationController class]]) {
-            visibleVC = [(UINavigationController *)visibleVC visibleViewController];
-        } else if (visibleVC.presentedViewController) {
-            visibleVC = visibleVC.presentedViewController;
-        }
-    } while (visibleVC.presentedViewController);
+    UIViewController *vc = [Przelewy24Payment rootViewController];
+    // OR old one:
+    // UIViewController *vc = [Przelewy24Payment visibleViewController];
 
-    visibleVC.modalPresentationStyle = UIModalPresentationFullScreen;
+    vc.modalPresentationStyle = UIModalPresentationFullScreen;
 
     // if (@available(iOS 13.0, *)) {
     //     vc.modalInPresentation = NO;
     // }
 
     dispatch_sync(dispatch_get_main_queue(), ^{
-        [P24 startTrnDirect:trnParams inViewController:visibleVC delegate:p24Handler];
+        [P24 startTrnDirect:trnParams inViewController:vc delegate:p24Handler];
     });
 }
 
@@ -117,6 +110,13 @@ RCT_EXPORT_METHOD(canMakeApplePayPayments:(RCTPromiseResolveBlock)resolve reject
     resolve(@([self canMakeApplePayPayments]));
 }
 
+RCT_EXPORT_METHOD(dismissApplePay:(RCTResponseSenderBlock)callback)
+{
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        [[Przelewy24Payment rootViewController] dismissViewControllerAnimated:YES completion:nil];
+    });
+}
+
 RCT_EXPORT_METHOD(finishApplePay:(NSString*)p24token)
 {
     dispatch_sync(dispatch_get_main_queue(), ^{
@@ -147,7 +147,7 @@ RCT_EXPORT_METHOD(startApplePay:(NSDictionary*)params callback:(RCTResponseSende
     p24ApplePayHandler.rctCallback = callback;
 
     p24ApplePayRegisterHandler = [P24ApplePayRegistrarProtocolHandler new];
-    p24ApplePayRegisterHandler.rctCallback = callback2;
+    p24ApplePayRegisterHandler.rctCallback2 = callback2;
     // p24ApplePayOnTokenCallback = callback2;
 
 // ORIGINAL SWIFT CODE EXAMPLE START
@@ -290,9 +290,7 @@ RCT_EXPORT_METHOD(clear)
 - (void) exchange: (NSString*) applePayToken delegate: (id<P24ApplePayTransactionRegistrarDelegate>) delegate {
     NSLog(@"Timestamp before exchange: %f", [[NSDate date] timeIntervalSince1970]);
     NSLog(@"ApplePay exchange applePayToken = %@", applePayToken);
-    [p24ApplePayRegisterHandler onRegisterSuccess:applePayToken delegate:delegate];
-    // [delegate onRegisterSuccess:@"D485AEB65C-C0F20B-9BC29D-BA835F21C4"];
-    // p24ApplePayOnTokenCallback(@[applePayToken]);
+    [p24ApplePayRegisterHandler onRegisterStart:applePayToken delegate:delegate];
     NSLog(@"Timestamp after exchange: %f", [[NSDate date] timeIntervalSince1970]);
 }
 
@@ -303,10 +301,21 @@ RCT_EXPORT_METHOD(clear)
 }
 
 + (UIViewController*) rootViewController {
-    return [[[[UIApplication sharedApplication] delegate] window]rootViewController];
-    // vc.modalPresentationStyle = UIModalPresentationFullScreen;
+    return [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+}
 
-    // return vc;
++ (UIViewController*) visibleViewController {
+    UIViewController *visibleVC = [[[UIApplication sharedApplication] keyWindow] rootViewController];
+
+    do {
+        if ([visibleVC isKindOfClass:[UINavigationController class]]) {
+            visibleVC = [(UINavigationController *)visibleVC visibleViewController];
+        } else if (visibleVC.presentedViewController) {
+            visibleVC = visibleVC.presentedViewController;
+        }
+    } while (visibleVC.presentedViewController);
+
+    return visibleVC;
 }
 
 @end

@@ -298,8 +298,17 @@ class P24Payment {
 		return await Przelewy24Payment.canMakeApplePayPayments();
 	}
 
+	static async finishApplePay(p24_token) {
+		return await Przelewy24Payment.finishApplePay(p24_token);
+	}
+
 	static clear() {
 		return Przelewy24Payment.clear();
+	}
+
+	static dismissApplePay(cb) {
+		const log = (...args) => console.log('dismissApplePay', ...args);
+		return Przelewy24Payment.dismissApplePay(cb || log);
 	}
 }
 

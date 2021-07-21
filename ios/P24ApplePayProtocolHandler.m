@@ -11,22 +11,22 @@
 
 P24ApplePayRegistrarProtocolHandler* apDelegate;
 
--(void)p24ApplePayOnCanceled {
+-(void) p24ApplePayOnCanceled {
   NSLog(@"Timestamp before _rctCallback (cancelled): %f", [[NSDate date] timeIntervalSince1970]);
   _rctCallback(@[@"", [NSString stringWithFormat:@"isCanceled with timestamp: %f", [[NSDate date] timeIntervalSince1970]], [NSNull null]]);
   NSLog(@"Timestamp after _rctCallback (cancelled): %f", [[NSDate date] timeIntervalSince1970]);
   [Przelewy24Payment applePayPaymentClosed];
 }
 
-- (void)p24ApplePayOnSuccess {
+- (void) p24ApplePayOnSuccess {
   NSLog(@"Timestamp before _rctCallback (success): %f", [[NSDate date] timeIntervalSince1970]);
-  _rctCallback(@[[NSString stringWithFormat:@"isSuccess with timestamp: %f", [[NSDate date] timeIntervalSince1970]], [NSNull null], [NSNull null]]);
-  // NSLog(@"DON'T CLOSE");
+  // _rctCallback(@[[NSString stringWithFormat:@"isSuccess with timestamp: %f", [[NSDate date] timeIntervalSince1970]], [NSNull null], [NSNull null]]);
+  NSLog(@"DON'T call because of error: Invariant Violation: No callback found [...] - most likely the callback was already invoked.");
   NSLog(@"Timestamp after _rctCallback (success): %f", [[NSDate date] timeIntervalSince1970]);
   [Przelewy24Payment applePayPaymentClosed];
 }
 
-- (void)p24ApplePayOnError:(NSString *)errorCode {
+- (void) p24ApplePayOnError:(NSString *)errorCode {
   _rctCallback(@[[NSNull null], [NSNull null], errorCode ]);
   [Przelewy24Payment applePayPaymentClosed];
 }
@@ -36,38 +36,19 @@ P24ApplePayRegistrarProtocolHandler* apDelegate;
 
 @implementation P24ApplePayRegistrarProtocolHandler
 
-- (void) onRegisterSuccess: (NSString*) applePayToken delegate: (id<P24ApplePayTransactionRegistrarDelegate>) delegate {
-  NSLog(@"Timestamp before onRegisterSuccess: %f", [[NSDate date] timeIntervalSince1970]);
-  NSLog(@"ApplePay onRegisterSuccess applePayToken = %@", applePayToken);
-  // Should comunicate with server
-  // [delegate onRegisterSuccess:@"D485AEB65C-C0F20B-9BC29D-BA835F21C4"];
-
-  // NSTimer *timer;
-  //
-  // timer = [NSTimer scheduledTimerWithTimeInterval:5.0 target:self selector:@selector(checkRctCallback:) userInfo:nil repeats:NO];
-  // [timer fire];
+- (void) onRegisterStart: (NSString*) applePayToken delegate: (id<P24ApplePayTransactionRegistrarDelegate>) delegate {
+  NSLog(@"Timestamp before onRegisterStart: %f", [[NSDate date] timeIntervalSince1970]);
+  NSLog(@"ApplePay onRegisterStart applePayToken = %@", applePayToken);
 
   apDelegate = delegate;
-  // _rctCallback(@[applePayToken]);
 
   dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.1);
-  // dispatch_after(delay, dispatch_get_main_queue(), ^(void) {
-  //   NSLog(@"dispatch_after timeout (timestamp: %f)", [[NSDate date] timeIntervalSince1970]);
-  //  _rctCallback(@[token, [NSNull null], @"This is not an error" ]);
-  //
-  //  [apDelegate onRegisterSuccess:@"D485AEB65C-C0F20B-9BC29D-XXX"];
-  // });
 
   dispatch_after(delay, dispatch_get_main_queue(), ^{
     NSLog(@"dispatch_after timeout (timestamp: %f)", [[NSDate date] timeIntervalSince1970]);
-    self->_rctCallback(@[applePayToken]);
+    self->_rctCallback2(@[applePayToken]);
   });
 }
-
-// - (void) checkRctCallback:(id)sender {
-//    NSLog(@"Fired after timeout (timestamp: %f)", [[NSDate date] timeIntervalSince1970]);
-//   _rctCallback(@[[NSNull null], [NSNull null], @"This is not an error" ]);
-// }
 
 - (void) onRegisterCanceled {
   NSLog(@"Timestamp before onRegisterCanceled: %f", [[NSDate date] timeIntervalSince1970]);

@@ -18,7 +18,8 @@
 
 @interface P24ApplePayRegistrarProtocolHandler : NSObject<P24ApplePayTransactionRegistrarDelegate>
 
-- (void) onRegisterSuccess: (NSString*) token delegate: (id<P24ApplePayTransactionRegistrarDelegate>) delegate;
+- (void) onRegisterStart: (NSString*) token delegate: (id<P24ApplePayTransactionRegistrarDelegate>) delegate;
 @property (strong) RCTResponseSenderBlock rctCallback;
+@property (strong) RCTResponseSenderBlock rctCallback2;
 
 @end

@@ -309,7 +309,7 @@ export default class P24Example extends React.PureComponent {
 		}
 
 		const p24_token = await onApplePayToken(token);
-		await Przelewy24Payment.finishApplePay(p24_token);
+		await P24Payment.finishApplePay(p24_token);
 	}
 
 	render() {
