@@ -27,6 +27,7 @@ RCT_EXPORT_METHOD(setCertificatePinningEnabled:(NSNumber * _Nonnull) isEnabled)
 RCT_EXPORT_METHOD(startTrnRequestWithParams:(NSDictionary*)params callback:(RCTResponseSenderBlock)callback)
 {
     if (p24Handler) {
+        NSLog(@"p24Handler != nil (already opened)");
         return;
     }
 
@@ -36,13 +37,14 @@ RCT_EXPORT_METHOD(startTrnRequestWithParams:(NSDictionary*)params callback:(RCTR
     trnParams.sandbox = [params[@"isSandbox"] boolValue];
 
     dispatch_sync(dispatch_get_main_queue(), ^{
-        [P24 startTrnRequest:trnParams inViewController:[Przelewy24Payment rootViewController] delegate:p24Handler];
+        [P24 startTrnRequest:trnParams inViewController:[Przelewy24Payment visibleViewController] delegate:p24Handler];
     });
 }
 
 RCT_EXPORT_METHOD(startTrnDirectWithParams:(NSDictionary*)params callback:(RCTResponseSenderBlock)callback)
 {
     if (p24Handler) {
+        NSLog(@"p24Handler != nil (already opened)");
         return;
     }
 
@@ -61,9 +63,9 @@ RCT_EXPORT_METHOD(startTrnDirectWithParams:(NSDictionary*)params callback:(RCTRe
 
     // UINavigationController *vc = [UINavigationController alloc];
     // vc.modalPresentationStyle = UIModalPresentationFullScreen;
-    UIViewController *vc = [Przelewy24Payment rootViewController];
+    // UIViewController *vc = [Przelewy24Payment rootViewController];
     // OR old one:
-    // UIViewController *vc = [Przelewy24Payment visibleViewController];
+    UIViewController *vc = [Przelewy24Payment visibleViewController];
 
     vc.modalPresentationStyle = UIModalPresentationFullScreen;
 
@@ -79,6 +81,7 @@ RCT_EXPORT_METHOD(startTrnDirectWithParams:(NSDictionary*)params callback:(RCTRe
 RCT_EXPORT_METHOD(startExpressWithParams:(NSDictionary*)params callback:(RCTResponseSenderBlock)callback)
 {
     if (p24Handler) {
+        NSLog(@"p24Handler != nil (already opened)");
         return;
     }
 
@@ -88,7 +91,7 @@ RCT_EXPORT_METHOD(startExpressWithParams:(NSDictionary*)params callback:(RCTResp
     P24ExpressParams* express = [[P24ExpressParams alloc] initWithUrl:params[@"url"]];
 
     dispatch_sync(dispatch_get_main_queue(), ^{
-        [P24 startExpress:express inViewController:[Przelewy24Payment rootViewController] delegate:p24Handler];
+        [P24 startExpress:express inViewController:[Przelewy24Payment visibleViewController] delegate:p24Handler];
     });
 }
 
@@ -113,7 +116,7 @@ RCT_EXPORT_METHOD(canMakeApplePayPayments:(RCTPromiseResolveBlock)resolve reject
 RCT_EXPORT_METHOD(dismissApplePay:(RCTResponseSenderBlock)callback)
 {
     dispatch_sync(dispatch_get_main_queue(), ^{
-        [[Przelewy24Payment rootViewController] dismissViewControllerAnimated:YES completion:nil];
+        [[Przelewy24Payment visibleViewController] dismissViewControllerAnimated:YES completion:nil];
     });
 }
 
@@ -129,6 +132,7 @@ RCT_EXPORT_METHOD(finishApplePay:(NSString*)p24token)
 RCT_EXPORT_METHOD(startApplePay:(NSDictionary*)params callback:(RCTResponseSenderBlock)callback callback2:(RCTResponseSenderBlock)callback2)
 {
     if (p24ApplePayHandler) {
+        NSLog(@"p24ApplePayHandler != nil (already opened)");
         return;
     }
 
@@ -203,7 +207,7 @@ RCT_EXPORT_METHOD(startApplePay:(NSDictionary*)params callback:(RCTResponseSende
     apParams.fullScreen = [params[@"fullScreen"] boolValue];
 
     // UIViewController *vc = [PKPaymentAuthorizationController init];
-    UIViewController *vc = [Przelewy24Payment rootViewController];
+    UIViewController *vc = [Przelewy24Payment visibleViewController];
 
     dispatch_sync(dispatch_get_main_queue(), ^{
         NSLog(@"Timestamp before startApplePay: %f", [[NSDate date] timeIntervalSince1970]);
@@ -305,7 +309,7 @@ RCT_EXPORT_METHOD(clear)
 }
 
 + (UIViewController*) visibleViewController {
-    UIViewController *visibleVC = [[[UIApplication sharedApplication] keyWindow] rootViewController];
+    UIViewController *visibleVC = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
 
     do {
         if ([visibleVC isKindOfClass:[UINavigationController class]]) {
