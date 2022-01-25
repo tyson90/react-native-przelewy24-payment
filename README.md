@@ -1,6 +1,9 @@
 # react-native-przelewy24-payment
 
-Based on [official example](https://github.com/przelewy24/p24-mobile-lib-react-native-example).
+Based on official docs and examples:
+* [Android library docs](https://github.com/przelewy24/p24-mobile-lib-android)
+* [iOS library docs](https://github.com/przelewy24/p24-mobile-lib-ios)
+* [React Native Example](https://github.com/przelewy24/p24-mobile-lib-react-native-example)
 
 ## Getting started
 
@@ -46,8 +49,109 @@ Finally, install CocoaPods by running command:
 
 ### Extra steps for Android
 
-```javascript
-// TODO: Extra steps for Android if needed
+#### 1. Adding dependencies
+
+Add the line to the top of the `android/app/build.gradle` file:
+
+`apply from: 'https://mobile.przelewy24.pl/p24lib.gradle'`
+
+Next, at `repositories` section, add value `p24()`:
+
+```gradle
+repositories {
+    // other repositories
+    p24()
+}
+```
+
+At the end, at `dependencies` section, add entry `implementation "pl.przelewy24:p24lib:+"`:
+
+```gradle
+dependencies {
+    implementation "pl.przelewy24:p24lib:+"
+}
+```
+
+Since the library uses the AndroidX library, the following dependency must be added:
+
+`implementation 'androidx.appcompat:appcompat:+'`
+
+When using SafetyNet you need add:
+
+`implementation 'com.google.android.gms:play-services-wallet:16.0.1'`
+
+When integrating with GooglePlay you need add:
+
+`implementation 'com.google.android.gms:play-services-safetynet:+'`
+
+Below is an example of a „dependencies” section:
+
+```gradle
+dependencies {
+    // other dependencies
+    implementation "pl.przelewy24:p24lib:+"
+    implementation 'com.google.android.gms:play-services-wallet:16.0.1' // necessary if google pay used
+    implementation 'com.google.android.gms:play-services-safetynet:+' // necessary if safetynet function enabled
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+}
+```
+
+#### 3. Proguard
+
+If the target project don't use GooglePlay, the following entry should be added to the proguard file:
+
+```proguard
+-dontwarn com.google.android.gms.wallet.**
+```
+
+#### 4. Definition of AndroidManifest file
+
+Add the following to `android/app/src/main/AndroidManifest.xml` file:
+
+```xml
+<uses-permission android:name="android.permission.INTERNET"/>
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+```
+
+Next, in `application` section, add `TransferActivity`:
+
+```xml
+<activity android:name="pl.przelewy24.p24lib.transfer.TransferActivity"
+          android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
+          android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
+```
+
+__All Activities in the library draw on the AppCompatActivity, which is why  „Theme.AppCompat.*” group styles as well as derivative styles should be used__
+
+In the case of default Activity settings, the WebView will get reloaded during the rotation of the library display screen, which may cause a return from the bank’s website to the list of payment forms and render further transaction processing impossible. In order to prevent the reloading of the library window, the following parameter must be set:
+
+```xml
+android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
+```
+
+Below is an example of an `android/app/src/main/AndroidManifext.xml` file:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="pl.przelewy24.p24example"
+    android:versionCode="1"
+    android:versionName="1.0.0">
+
+    <!--other permissions-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application >
+
+        <!--other activities-->
+
+        <activity android:name="pl.przelewy24.p24lib.transfer.TransferActivity"
+                  android:configChanges="keyboardHidden|orientation|keyboard|screenSize"
+                  android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
+
+    </application>
+</manifest>
 ```
 
 ## Usage
@@ -65,11 +169,11 @@ const P24_CHANNEL_PREPAYMENT = 32;
 
 // Define configuration
 const config = {
-	merchant_id: '[YOUR P24 MERCHANT ID]',
-	crc: '[YOUR P24 CRC]',
-	ssl_pinning: false,
-	is_sandbox: true,
-	sandbox_crc: '[YOUR P24 CRC FOR SANDBOX]', // required if you want to test in sandbox mode
+    merchant_id: '[YOUR P24 MERCHANT ID]',
+    crc: '[YOUR P24 CRC]',
+    ssl_pinning: false,
+    is_sandbox: true,
+    sandbox_crc: '[YOUR P24 CRC FOR SANDBOX]', // required if you want to test in sandbox mode
 }
 
 // Get instance
@@ -77,9 +181,9 @@ const p24 = new Przelewy24Payment(config);
 
 // Define your callbacks for successfull and cancelled transactions and if error occurs
 const p24_callbacks = {
-	success: (msg) => console.info(msg),
-	cancel: (msg) => console.info(msg),
-	error: (error) => console.warn(error),
+    success: (msg) => console.info(msg),
+    cancel: (msg) => console.info(msg),
+    error: (error) => console.warn(error),
 }
 ```
 
@@ -88,31 +192,31 @@ const p24_callbacks = {
 ```javascript
 // Define request parameters (in real world you will get it ex. from user order)
 const trn_params = {
-	// required parameters
-	sessionId: '[SOME UNIQUE SESSION ID AS STRING]',
-	amount: 2500, // amount 2500 = $25.00
-	currency: 'USD',
-	description: 'Order number XYZ',
-	email: 'test@test.com',
-	country: 'US',
-	// some optional client data
-	client: 'John Smith',
-	address: 'Street with house/flat number',
-	zip: '00-000',
-	city: 'New York',
-	phone: '+1 000 111 2222',
-	language: 'en',
-	// some optional other parameters
-	urlStatus: 'https://yourdomain.com/p24_status_return.php',
-	timeLimit: 15, // time in minutes
+    // required parameters
+    sessionId: '[SOME UNIQUE SESSION ID AS STRING]',
+    amount: 2500, // amount 2500 = $25.00
+    currency: 'USD',
+    description: 'Order number XYZ',
+    email: 'test@test.com',
+    country: 'US',
+    // some optional client data
+    client: 'John Smith',
+    address: 'Street with house/flat number',
+    zip: '00-000',
+    city: 'New York',
+    phone: '+1 000 111 2222',
+    language: 'en',
+    // some optional other parameters
+    urlStatus: 'https://yourdomain.com/p24_status_return.php',
+    timeLimit: 15, // time in minutes
 }
 
 // If you need disable all methods except cards
 let cardsOnly = true;
 
 if (cardsOnly) {
-	trn_data.channel = P24_CHANNEL_CARDS;
-	// Or you can set it to another one
+    trn_data.channel = P24_CHANNEL_CARDS;
+    // Or you can set it to another one
 }
 
 // Make transaction call
@@ -146,13 +250,13 @@ p24.startTrnExpress(url, p24_callbacks);
 const items = [];
 
 items.push({
-	name: 'Item #1',
-	description: 'Description #1',
-	number: 1,
-	quantity: 3,
-	price: 1000,
-	targetAmount: 3000, // item.price * item.quantity
-	targetPosId: '[TARGET POS ID]',
+    name: 'Item #1',
+    description: 'Description #1',
+    number: 1,
+    quantity: 3,
+    price: 1000,
+    targetAmount: 3000, // item.price * item.quantity
+    targetPosId: '[TARGET POS ID]',
 });
 
 // items.push(/* second item */);
@@ -160,10 +264,39 @@ items.push({
 p24.startTrnPassage(trn_params, items, p24_callbacks);
 ```
 
-### 6. Apple Pay
+### 5. Apple Pay
 
 ```javascript
-// TODO: Paste from P24 doc and own JS code
+// Check if ApplePay is available
+if (Przelewy24Payment.canMakeApplePayPayments()) {
+    try {
+        // Request data
+        const ap_request = {
+            appleMerchantId: '[YOUR APPLE PAY MERCHANT ID]',
+            amount: 2500, // amount 2500 = $25.00,
+            currency: 'USD',
+            description: '[BUSINESS NAME]', // see Apple Pay guidelines: https://developer.apple.com/design/human-interface-guidelines/apple-pay/overview/checkout-and-payment/
+        };
+
+        // Init Apple Pay payment
+        p24.startApplePay(ap_request, p24_callbacks, processPaymentData);
+    } catch (e) {
+        console.warn(e);
+    }
+} else {
+    console.warn('Cannot make Apple Pay payments');
+}
+
+async function processPaymentData(payment_data) {
+    // Your own logic to process payment data to the server
+    console.log(payment_data);
+}
+```
+
+### 6. Google Pay
+
+```javascript
+// TODO: Paste from P24 doc and/or own JS code
 ```
 
 ### Quick Example Screen
@@ -173,34 +306,35 @@ import Example from 'react-native-przelewy24-payment/Example';
 
 export default class P24ExampleComponent extends React.Component
 {
-	render() {
-		const config = {
-			merchantId: '[YOUR P24 MERCHANT ID]',
-			crc: '[YOUR P24 CRC]',
-			sslPinningEnabled: false,
-			isSandbox: true,
-			sandboxCrc: '[YOUR P24 CRC FOR SANDBOX]', // required if you want to test in sandbox mode
-		}
+    render() {
+        const config = {
+            merchantId: '[YOUR P24 MERCHANT ID]',
+            crc: '[YOUR P24 CRC]',
+            sslPinningEnabled: false,
+            isSandbox: true,
+            sandboxCrc: '[YOUR P24 CRC FOR SANDBOX]', // required if you want to test in sandbox mode
+        }
 
-		return (
-			<Example
-				merchantId={config.merchantId}
-				crc={config.crc}
-				sslPinning={config.sslPinningEnabled}
-				isSandbox={config.isSandbox}
-				sandboxCrc={config.sandboxCrc}
-			/>
-		)
-	}
+        return (
+            <Example
+                merchantId={config.merchantId}
+                crc={config.crc}
+                sslPinning={config.sslPinningEnabled}
+                isSandbox={config.isSandbox}
+                sandboxCrc={config.sandboxCrc}
+            />
+        )
+    }
 }
 ```
 
 # TODO
 
-* [ ] Android implementation
-* [ ] Android testting
-* [ ] iOS: Transfer trnRequest tests
-* [ ] iOS: Transfer express tests
-* [ ] iOS: Transfer passage tests
-* [ ] iOS: Change UIModalPresentationStyle to UIModalPresentationFullScreen
+* [x] Android implementation
+* [x] Android testting
+* [ ] Transfer trnRequest tests
+* [ ] Transfer express tests
+* [ ] Transfer passage tests
+* [ ] [iOS] Change UIModalPresentationStyle to UIModalPresentationFullScreen
+* [ ] [Android] Google Pay implementation
 * [ ] Update README
