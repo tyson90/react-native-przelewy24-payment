@@ -6,7 +6,7 @@ const { RNPrzelewy24Payment: Przelewy24Payment } = NativeModules;
 class P24Payment {
 	constructor({ merchant_id, crc, sandbox_crc, ssl_pinning, is_sandbox } = {}) {
 		this.config = {
-			merchant_id: `${merchant_id}`,
+			merchant_id: +merchant_id,
 			crc: `${crc}`,
 			sandbox_crc: `${sandbox_crc}`,
 			ssl_pinning: !!ssl_pinning,
