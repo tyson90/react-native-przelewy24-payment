@@ -16,13 +16,12 @@ import {
 	KeyboardAvoidingView,
 	Button,
 	Switch,
-	NativeModules,
 	Platform,
 	Dimensions,
 	Alert,
 } from 'react-native';
 
-import { P24Payment, Przelewy24Payment } from './P24';
+import { P24Payment } from './P24';
 
 function getTestTransactionParams(amount = 3) {
 	return {
@@ -118,16 +117,24 @@ export class SandboxSwitch extends React.PureComponent {
 	}
 }
 
-export class TrnRequestButton extends React.PureComponent {
+export class P24TestButton extends React.PureComponent
+{
 	render() {
 		return (
 			<View style={styles.buttonContainer}>
-				<Button
-					title={'Transfer trnRequest'}
-					styleDisabled={{ color: 'red' }}
-					onPress={this.props.onPress}>
-				</Button>
+				<Button {...this.props} />
 			</View>
+		)
+	}
+}
+
+export class TrnRequestButton extends React.PureComponent {
+	render() {
+		return (
+			<P24TestButton
+				title={'Transfer trnRequest'}
+				{...this.props}
+			/>
 		)
 	}
 }
@@ -135,13 +142,10 @@ export class TrnRequestButton extends React.PureComponent {
 export class TrnDirectButton extends React.PureComponent {
 	render() {
 		return (
-			<View style={styles.buttonContainer}>
-				<Button
-					title={'Transfer trnDirect'}
-					styleDisabled={{ color: 'red' }}
-					onPress={this.props.onPress}>
-				</Button>
-			</View>
+			<P24TestButton
+				title={'Transfer trnDirect'}
+				{...this.props}
+			/>
 		)
 	}
 }
@@ -149,13 +153,10 @@ export class TrnDirectButton extends React.PureComponent {
 export class ExpressButton extends React.PureComponent {
 	render() {
 		return (
-			<View style={styles.buttonContainer}>
-				<Button
-					title={'Transfer express'}
-					styleDisabled={{ color: 'red' }}
-					onPress={this.props.onPress}>
-				</Button>
-			</View>
+			<P24TestButton
+				title={'Transfer express'}
+				{...this.props}
+			/>
 		)
 	}
 }
@@ -163,13 +164,10 @@ export class ExpressButton extends React.PureComponent {
 export class PassageButton extends React.PureComponent {
 	render() {
 		return (
-			<View style={styles.buttonContainer}>
-				<Button
-					title={'Transfer passage'}
-					styleDisabled={{ color: 'red' }}
-					onPress={this.props.onPress}>
-				</Button>
-			</View>
+			<P24TestButton
+				title={'Transfer passage'}
+				{...this.props}
+			/>
 		)
 	}
 }
@@ -177,16 +175,28 @@ export class PassageButton extends React.PureComponent {
 export class ApplePayButton extends React.PureComponent {
 	render() {
 		return (
-			<View style={styles.buttonContainer}>
-				<Button
-					title={this.props.title || 'Apple Pay'}
-					styleDisabled={{ color: 'red' }}
-					onPress={this.props.onPress}>
-				</Button>
-			</View>
+			<P24TestButton
+				{...this.props}
+				title={this.props.title || 'Apple Pay'}
+				disabled={Platform.OS !== 'ios'}
+			/>
 		)
 	}
 }
+
+export class GooglePayButton extends React.PureComponent {
+	render() {
+		return (
+			<P24TestButton
+				{...this.props}
+				title={this.props.title || 'Google Pay'}
+				disabled={Platform.OS !== 'android'}
+			/>
+		)
+	}
+}
+
+GooglePayButton
 
 export class TokenInput extends React.PureComponent {
 	render() {
@@ -217,13 +227,18 @@ export default class P24Example extends React.PureComponent {
 		}
 
 		const checkProps = () => {
-			if (!this.props.merchantId || !this.props.crc || (this.props.isSandbox && !this.props.sandboxCrc)) {
-				Alert.alert('Warning', 'Missing required props: '+ ['merchantId', 'crc', this.props.isSandbox && 'sandboxCrc (when isSandbox={true})'].filter(e => e).join(', '));
+			const { merchantId, crc, isSandbox, sandboxCrc } = this.props;
+			const info = 'Missing required props: '+ ['merchantId', 'crc', isSandbox && 'sandboxCrc (when isSandbox={true})'].filter(e => e).join(', ');
+
+			if (!merchantId || !crc || (isSandbox && !sandboxCrc)) {
+				Alert.alert('Warning', info);
 			}
 		}
 
-		if (process?.env?.NODE_ENV && process?.env?.NODE_ENV !== 'production') {
-			Alert.alert('Warning', 'The library contains anti-debug traps, so when using the library methods make sure the „Debug Executable” option is off.', checkProps);
+		if (process?.env?.NODE_ENV && process?.env?.NODE_ENV !== 'production' && Platform.OS == 'ios') {
+			const info = 'The library contains anti-debug traps, so when using the library methods make sure the „Debug Executable” option is off.';
+
+			Alert.alert('Warning', info, [{ onPress:checkProps, title:'checkProps' }]);
 		} else {
 			checkProps();
 		}
@@ -303,13 +318,19 @@ export default class P24Example extends React.PureComponent {
 		console.log(typeof onApplePayToken, { token, args });
 
 		if (typeof onApplePayToken !== 'function') {
-			Alert.alert('Error', 'You should provide `onApplePayToken` prop (async func, which should return valid P24_TRANSACTION_TOKEN) for finish Apple Pay');
+			const info = 'You should provide `onApplePayToken` prop (async func, which should return valid P24_TRANSACTION_TOKEN) for finish Apple Pay';
+
+			Alert.alert('Error', info);
 			P24Payment.clear();
 			return;
 		}
 
 		const p24_token = await onApplePayToken(token);
 		await P24Payment.finishApplePay(p24_token);
+	}
+
+	startGoolePay = async () => {
+		console.error('Google Pay is not implemented yet');
 	}
 
 	render() {
@@ -319,14 +340,7 @@ export default class P24Example extends React.PureComponent {
 					{'Przelewy24 (PayPro S.A.) payments implementation for React Native'}
 				</Text>
 				<Text style={styles.instructions}>
-					{'To get started, press any button below'}
-				</Text>
-
-				<Text>
-					{'\n'}
-					{'\n'}
-					{'\n'}
-					{'\n'}
+					{'To get started, press any button below\n'}
 				</Text>
 
 				<SandboxSwitch
@@ -343,6 +357,7 @@ export default class P24Example extends React.PureComponent {
 					onPress={this.startApplePayWithItems}
 					title={'Apple Pay with items'}
 				/>
+				<GooglePayButton onPress={this.startGoolePay} />
 
 				<TokenInput
 					value={this.state.url_or_token}
@@ -379,5 +394,6 @@ const styles = StyleSheet.create({
 	buttonContainer: {
 		justifyContent: 'center',
 		alignItems: 'center',
+		marginVertical: 4,
 	},
 })
