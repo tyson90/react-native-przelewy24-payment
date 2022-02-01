@@ -43,11 +43,9 @@ class P24Payment {
 
 			if (success) {
 				console.log('Transfer success');
-				await require('utils/Helper').fakeAwait(2500);
 				this.finishWithStatus('success', info, callbacks);
 			} else if (cancel) {
 				console.log('Transfer canceled');
-				await require('utils/Helper').fakeAwait(2500);
 				this.finishWithStatus('cancel', info, callbacks);
 			} else {
 				console.log(`Transfer error. Code: ${error}`);
